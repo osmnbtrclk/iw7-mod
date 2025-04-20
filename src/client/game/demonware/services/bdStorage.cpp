@@ -41,6 +41,27 @@ namespace demonware
 
 	bool bdStorage::load_publisher_resource(const std::string& name, std::string& buffer)
 	{
+		// Check if this is a playlist file
+		if (std::regex_match(name, std::regex{"playlists(_.+)?\\.aggr"}))
+		{
+			// Try to load from mod folder first
+			std::string mod_playlist_path = "iw7-mod/playlists/" + name;
+			if (utils::io::read_file(mod_playlist_path, &buffer))
+			{
+#ifdef DW_DEBUG
+				printf("[DW]: [bdStorage]: loaded playlist from mod folder: %s\n", mod_playlist_path.data());
+#endif
+				return true;
+			}
+#ifdef DW_DEBUG
+			else
+			{
+				printf("[DW]: [bdStorage]: playlist not found in mod folder, falling back to embedded resource: %s\n", name.data());
+			}
+#endif
+		}
+
+		// Continue with normal resource loading
 		for (const auto& resource : this->publisher_resources_)
 		{
 			if (std::regex_match(name, resource.first))
@@ -133,16 +154,7 @@ namespace demonware
 
 	std::string bdStorage::get_user_file_path(const std::string& name)
 	{
-		const auto regular_path = "iw7-mod/players2/user/"s;
-		
-		// disable this for now
-		/*static const auto fs_game = game::Dvar_FindVar("fs_game");
-		if (fs_game && fs_game->current.string && *fs_game->current.string)
-		{
-			return regular_path + fs_game->current.string + "/" + name;
-		}*/
-
-		return regular_path + name;
+		return "iw7-mod/players2/user/" + name;
 	}
 
 	void bdStorage::uploadAndValidateFiles(service_server* server, byte_buffer* buffer) const
