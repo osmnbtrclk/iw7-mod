@@ -7,6 +7,8 @@
 
 #include "game/game.hpp"
 
+#define DW_DEBUG
+
 namespace demonware
 {
 	bdStorage::bdStorage() : service(10, "bdStorage")
